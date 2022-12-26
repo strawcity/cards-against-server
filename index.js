@@ -4,7 +4,6 @@ const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
 httpServer.listen(8080, () => console.log("Listening.. on 8080"));
 
-
 const players = {};
 const games = {};
 const thirtyMinutes = 30 * 60 * 1000;
