@@ -195,13 +195,24 @@ wsServer.on("request", (request) => {
       players[winningPlayer].wonCards++;
 
       game.players.forEach((player) => {
-        const payLoad = {
-          method: "show-winner",
-          winningPlayer: playerId,
-          wonCards: players[player.playerId].wonCards
-        };
+        if (players[player.playerId].wonCards === 5) {
+          const payLoad = {
+            method: "show-game-winner",
+            winningPlayer: playerId,
+          };
+          game.players.forEach((player) => {
+            players[player.playerId].connection.send(JSON.stringify(payLoad))
+          })
+        } else {
+          const payLoad = {
+            method: "show-round-winner",
+            winningPlayer: playerId,
+            wonCards: players[player.playerId].wonCards
+          };
 
-        players[player.playerId].connection.send(JSON.stringify(payLoad));
+          players[player.playerId].connection.send(JSON.stringify(payLoad));
+        }
+
       });
     }
 
