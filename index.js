@@ -6,13 +6,12 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const { answers, questions } = require('./cards/data.cjs')
 const io = new Server(server,
   {
     cors: {
       origin: config.CORS_ALLOW
     }
-
-
   });
 const players = {};
 const games = {};
