@@ -11,8 +11,7 @@ const io = new Server(server,
       origin: config.CORS_ALLOW
     }
   });
-console.log(`NODE_ENV=${config.NODE_ENV}`);
-console.log(`CORS_ALLOW=${config.CORS_ALLOW}`);
+
 const players = {};
 const games = {};
 const thirtyMinutes = 30 * 60 * 1000;
