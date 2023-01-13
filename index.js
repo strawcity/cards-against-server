@@ -1,3 +1,5 @@
+
+const config = require('./config.js');
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -6,10 +8,11 @@ const { Server } = require("socket.io");
 const io = new Server(server,
   {
     cors: {
-      origin: "http://localhost:5173"
+      origin: config.CORS_ALLOW
     }
   });
-
+console.log(`NODE_ENV=${config.NODE_ENV}`);
+console.log(`CORS_ALLOW=${config.CORS_ALLOW}`);
 const players = {};
 const games = {};
 const thirtyMinutes = 30 * 60 * 1000;
