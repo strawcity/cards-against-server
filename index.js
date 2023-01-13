@@ -14,7 +14,6 @@ const io = new Server(server,
 
 
   });
-console.log("🚀 ~ config.CORS_ALLOW", config.CORS_ALLOW)
 const players = {};
 const games = {};
 const thirtyMinutes = 30 * 60 * 1000;
