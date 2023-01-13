@@ -1,5 +1,4 @@
 
-const config = require('./config.js');
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -8,8 +7,9 @@ const { Server } = require("socket.io");
 const io = new Server(server,
   {
     cors: {
-      origin: config.CORS_ALLOW
+      origin: process.env.CORS_ALLOW
     }
+
   });
 
 const players = {};
