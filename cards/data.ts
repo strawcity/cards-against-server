@@ -1,4 +1,5 @@
-const answers = ["I am haunted by feedback",
+export const answers = [
+  "I am haunted by feedback",
   "Acceptance criteria",
   "Kanban",
   "Daily Dance-Up",
@@ -321,9 +322,9 @@ const answers = ["I am haunted by feedback",
   "impediments",
   "real coders test in production",
   "scaling",
-]
+];
 
-const questions = [
+export const questions = [
   "This is the way the world ends. Not with a bang but with ---.",
   "Dear Abby, I'm having some trouble with --- and would like your advice.",
   "Kids, I don't need drugs to get high. I'm high on ---",
@@ -365,9 +366,9 @@ const questions = [
   "--- really turns me on!",
   "We tried --- already, and it does not work.",
   "--- was not in the contract",
-]
+];
 
 module.exports = {
   answers,
-  questions
-}
+  questions,
+};
