@@ -8,6 +8,7 @@ import {
   GameState,
   JoinGameResult,
   Player,
+  SelectWinnerResult,
   ShowCurrentCardResult,
   StartGameResult,
   SubmitCardResult
@@ -17,10 +18,12 @@ import jwt from "jsonwebtoken";
 import {
   initializePlayer,
   initializeGameState,
-  initializeGameRound,
-  submitCardEvent,
   joinGame
 } from "./logic/gameLogic";
+import { submitCardEvent } from "./logic/submitCardEvent";
+import { showCurrentAnswer } from "./logic/showCurrentAnswer";
+import { startGameRound } from "./logic/startGameRound";
+import { selectWinner } from "./logic/selectWinner";
 import { distributeCards, guid } from "./logic/utils";
 import { answers, questions } from "./cards/data";
 
@@ -92,7 +95,9 @@ io.on("connection", (socket) => {
     // Create gameId
     const gameId = guid();
     const game = initializeGameState(gameId);
+    games[gameId] = game;
 
+    // Push game to server game state
     // Push the game creating player to the game
     game.players.push(initializePlayer(result, socket));
 
@@ -101,98 +106,39 @@ io.on("connection", (socket) => {
       game: games[gameId],
       nickname: result.nickname
     });
+  });
 
-    socket.on("join-game", (result: JoinGameResult) => {
-      // Expects a playerId and a nickname, returns a game and a list of players
-      // const player = players[playerId];
-      const game = games[result.gameId];
+  socket.on("join-game", (result: JoinGameResult) => {
+    // Expects a playerId and a nickname, returns a game and a list of players
+    // const player = players[playerId];
+    const game = games[result.gameId];
 
-      if (game === undefined) {
-        socket.emit("no-game", "No game found");
-        return;
-      }
+    if (game === undefined) {
+      socket.emit("no-game", "No game found");
+      return;
+    }
 
-      if (game.players.length > 6) {
-        //sorry max players reach
-        return;
-      }
+    if (game.players.length > 6) {
+      //sorry max players reach
+      return;
+    }
 
-      joinGame(game, result, socket);
-    });
+    joinGame(game, result, socket);
+  });
 
-    socket.on("start-game", (result: StartGameResult) => {
-      const gameId = result.gameId;
-      const game = games[gameId];
-      initializeGameRound(game);
-    });
+  socket.on("start-game", (result: StartGameResult) => {
+    startGameRound(games[result.gameId]);
+  });
 
-    socket.on("submit-card", (result: SubmitCardResult) => {
-      const submittedCard = result.submittedCard;
-      const playerId = result.playerId;
-      const gameId = result.gameId;
+  socket.on("submit-card", (result: SubmitCardResult) => {
+    submitCardEvent(games[result.gameId], result);
+  });
 
-      const game = games[gameId];
+  socket.on("show-current-answer", (result: ShowCurrentCardResult) => {
+    showCurrentAnswer(result, games[result.gameId]);
+  });
 
-      submitCardEvent(game, playerId, submittedCard);
-      // // Adding submittedCard to game's submitted cards
-      // game.submittedCards.push({ player: playerId, card: submittedCard[0] });
-
-      // // Remove card from answerCards array
-      // players[playerId].answerCards = players[playerId].answerCards.filter(
-      //   (card) => card !== submittedCard[0]
-      // );
-
-      // game.players.forEach((player) => {
-      //   // If the person is asking the question, they should get the other cards
-      //   if (player.isAskingQuestion) {
-      //     players[player.playerId].socket.emit("receive-answer-card", {
-      //       submittedCards: game.submittedCards
-      //     });
-
-      //     // If all cards are submitted, start reviewing
-      //   }
-
-      //   if (game.submittedCards.length === game.players.length - 1) {
-      //     // If the person is asking the question, they should get the other cards
-      //     players[player.playerId].socket.emit("start-card-review");
-      //   }
-      // });
-    });
-
-    socket.on("show-current-answer", (result: ShowCurrentCardResult) => {
-      const playerId = result.playerId;
-      const answer = result.answer;
-      const gameId = result.gameId;
-      const game = games[gameId];
-
-      game.players.forEach((player) => {
-        players[player.playerId].socket.emit("show-answer", {
-          inFocusCard: { player: playerId, answer: answer }
-        });
-      });
-    });
-
-    socket.on("select-winner", (result) => {
-      const winningPlayer = result.winningPlayer;
-      const gameId = result.gameId;
-      const game = games[gameId];
-
-      players[winningPlayer].wonCards++;
-
-      game.players.forEach((player) => {
-        if (players[player.playerId].wonCards === 5) {
-          game.players.forEach((player) => {
-            players[player.playerId].socket.emit("show-game-winner", {
-              winningPlayer: playerId
-            });
-          });
-        } else {
-          players[player.playerId].socket.emit("show-round-winner", {
-            winningPlayer: playerId,
-            wonCards: players[player.playerId].wonCards
-          });
-        }
-      });
-    });
+  socket.on("select-winner", (result: SelectWinnerResult) => {
+    selectWinner(result, games[result.gameId]);
   });
 });

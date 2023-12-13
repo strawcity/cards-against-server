@@ -57,3 +57,8 @@ export interface ShowCurrentCardResult {
   gameId: string;
   answer: string[];
 }
+
+export interface SelectWinnerResult {
+  winningPlayerId: string;
+  gameId: string;
+}
