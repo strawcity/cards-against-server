@@ -12,8 +12,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: config.CORS_ALLOW,
-  },
+    origin: config.CORS_ALLOW
+  }
 });
 
 interface Player {
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
     isAskingQuestion: false,
     wonCards: 0,
     answerCards: [],
-    socket,
+    socket
   };
 
   socket.emit("connected", playerId);
@@ -102,7 +102,7 @@ io.on("connection", (socket) => {
       players: [],
       submittedCards: [],
       playerRotationPosition: 0,
-      questionCard: [],
+      questionCard: []
     };
 
     const game = games[gameId];
@@ -113,12 +113,12 @@ io.on("connection", (socket) => {
       timestamp: Date.now(),
       isAskingQuestion: false,
       wonCards: 0,
-      answerCards: [],
+      answerCards: []
     });
 
     socket.emit("create-game", {
       game: games[gameId],
-      nickname: result.nickname,
+      nickname: result.nickname
     });
   });
 
@@ -150,13 +150,13 @@ io.on("connection", (socket) => {
       timestamp: Date.now(),
       isAskingQuestion: false,
       wonCards: 0,
-      answerCards: [],
+      answerCards: []
     });
 
     game.players.forEach((player) => {
       players[player.playerId].socket.emit("join-game", {
         game: games[gameId],
-        nickname: result.nickname,
+        nickname: result.nickname
       });
     });
   });
@@ -194,7 +194,7 @@ io.on("connection", (socket) => {
       players[player.playerId].socket.emit("start-game", {
         answerCards: players[player.playerId].answerCards,
         questionCard: game.questionCard[0],
-        isAskingQuestion: player.isAskingQuestion,
+        isAskingQuestion: player.isAskingQuestion
       });
     });
   });
@@ -217,7 +217,7 @@ io.on("connection", (socket) => {
       // If the person is asking the question, they should get the other cards
       if (player.isAskingQuestion) {
         players[player.playerId].socket.emit("receive-answer-card", {
-          submittedCards: game.submittedCards,
+          submittedCards: game.submittedCards
         });
 
         // If all cards are submitted, start reviewing
@@ -238,29 +238,29 @@ io.on("connection", (socket) => {
 
     game.players.forEach((player) => {
       players[player.playerId].socket.emit("show-answer", {
-        inFocusCard: { player: playerId, answer: answer },
+        inFocusCard: { player: playerId, answer: answer }
       });
     });
   });
 
   socket.on("select-winner", (result) => {
-    const winningPlayer = result.winningPlayer;
+    const winningPlayerId = result.winningPlayerId;
     const gameId = result.gameId;
     const game = games[gameId];
 
-    players[winningPlayer].wonCards++;
+    players[winningPlayerId].wonCards++;
 
     game.players.forEach((player) => {
       if (players[player.playerId].wonCards === 5) {
         game.players.forEach((player) => {
           players[player.playerId].socket.emit("show-game-winner", {
-            winningPlayer: playerId,
+            winningPlayerId: playerId
           });
         });
       } else {
         players[player.playerId].socket.emit("show-round-winner", {
-          winningPlayer: playerId,
-          wonCards: players[player.playerId].wonCards,
+          winningPlayerId: playerId,
+          wonCards: players[player.playerId].wonCards
         });
       }
     });
@@ -291,7 +291,7 @@ io.on("connection", (socket) => {
       players[player.playerId].socket.emit("new-round", {
         answerCards: players[player.playerId].answerCards,
         questionCard: game.questionCard[0],
-        isAskingQuestion: player.isAskingQuestion,
+        isAskingQuestion: player.isAskingQuestion
       });
     });
   });

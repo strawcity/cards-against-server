@@ -1,13 +1,13 @@
 import { Socket } from "socket.io";
-import { CreateGameResult, JoinGameResult } from "../types";
+import { CreateGameResult, Game, JoinGameResult } from "../types";
 import { initializeGameState, initializePlayer } from "./gameLogic";
 import { guid } from "./utils";
 
-export function createGame(result: CreateGameResult, socket: Socket) {
-  // Create gameId
-  const gameId = guid();
-  const game = initializeGameState(gameId);
-
+export function createGame(
+  result: CreateGameResult,
+  socket: Socket,
+  game: Game
+) {
   // Push the game creating player to the game
   game.players.push(initializePlayer(result, socket));
 

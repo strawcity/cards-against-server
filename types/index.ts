@@ -22,7 +22,6 @@ export interface Game {
   timestamp: number;
   id: string;
   players: Player[];
-  // players: { [playerId: string]: Player }[];
   submittedCards: { player: string; card: string }[];
   playerRotationPosition: number;
   questionCard: string[];

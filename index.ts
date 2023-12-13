@@ -1,11 +1,10 @@
 import express, { Request, Response } from "express";
 import http from "http";
 import { config } from "./config";
-import { Socket, Server as SocketIOServer } from "socket.io";
+import { Server as SocketIOServer } from "socket.io";
 import {
   CreateGameResult,
   Game,
-  GameState,
   JoinGameResult,
   Player,
   SelectWinnerResult,
@@ -20,12 +19,13 @@ import {
   initializeGameState,
   joinGame
 } from "./logic/gameLogic";
+import { createGame } from "./logic/createGame";
 import { submitCardEvent } from "./logic/submitCardEvent";
 import { showCurrentAnswer } from "./logic/showCurrentAnswer";
 import { startGameRound } from "./logic/startGameRound";
 import { selectWinner } from "./logic/selectWinner";
-import { distributeCards, guid } from "./logic/utils";
-import { answers, questions } from "./cards/data";
+import { newRound } from "./logic/newRound";
+import { guid } from "./logic/utils";
 
 const app = express();
 const server = http.createServer(app);
@@ -67,6 +67,7 @@ app.get(
       id: guid()
     }; // Generate a unique ID
     const token = jwt.sign(user, "your-secret-key");
+    console.log("🚀 ~ token:", token);
     res.json({
       token
     });
@@ -96,16 +97,7 @@ io.on("connection", (socket) => {
     const gameId = guid();
     const game = initializeGameState(gameId);
     games[gameId] = game;
-
-    // Push game to server game state
-    // Push the game creating player to the game
-    game.players.push(initializePlayer(result, socket));
-
-    // Send the game back to the player and return the nickname to save in UI state
-    socket.emit("create-game", {
-      game: games[gameId],
-      nickname: result.nickname
-    });
+    createGame(result, socket, game);
   });
 
   socket.on("join-game", (result: JoinGameResult) => {
@@ -141,4 +133,12 @@ io.on("connection", (socket) => {
   socket.on("select-winner", (result: SelectWinnerResult) => {
     selectWinner(result, games[result.gameId]);
   });
+
+  socket.on("new-round", (result: { gameId: string }) => {
+    newRound(games[result.gameId]);
+  });
+});
+
+server.listen(8080, () => {
+  console.log("listening on *:8080");
 });
